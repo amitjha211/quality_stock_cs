@@ -111,13 +111,63 @@ namespace bhavDataAnalysis
 
         private void frmTest_Load(object sender, EventArgs e)
         {
-
+            
         }
+
+
+        private void color_close_price()
+        {
+            int iCol = 0;
+
+            foreach (DataGridViewColumn col in dataGridView1.Columns)
+            {
+                if (col.DataPropertyName.ToUpper() == "CLOSE_PRICE")
+                {
+                    iCol = col.Index;
+                }
+            }
+            if(iCol ==0) return ;
+
+            for (int iRow = 0; iRow < dataGridView1.Rows.Count; iRow++)
+            {
+                DataRowView r = dataGridView1.Rows[iRow].DataBoundItem as DataRowView;
+                //if (r == null) return;
+
+                decimal pre_close = (decimal)r["PREV_CLOSE"];
+
+                decimal close_price =(decimal)r["CLOSE_PRICE"];
+
+
+                if (close_price > pre_close)
+                {
+                    dataGridView1.Rows[iRow].Cells[iCol].Style.ForeColor = Color.DarkGreen;
+                }
+
+                if (close_price < pre_close)
+                {
+                    dataGridView1.Rows[iRow].Cells[iCol].Style.ForeColor = Color.DarkRed;
+                }
+                
+                
+            }
+        }
+
+
 
         private void btnShow_Click(object sender, EventArgs e)
         {
             bindingSource1.DataSource = t;
-            bindingSource1.Filter = " DELIV_PER > " + txtDeliveryPer.Text + " and  DELIV_QTY > " + txtVolume.Text;
+            string qFilter = "";
+
+            qFilter = " DELIV_PER > " + txtDeliveryPer.Text + " and  DELIV_QTY > " + txtVolume.Text;
+
+            if (txtQuickSearch.Text.isEmpty() == false)
+            { 
+                qFilter += string.Format(" and symbol like '{0}*'",txtQuickSearch.Text);
+            }
+
+            bindingSource1.Filter = qFilter;
+
 
             dataGridView1.AutoGenerateColumns = false;
             dataGridView1.Columns.Clear();
@@ -134,6 +184,8 @@ namespace bhavDataAnalysis
             }
 
             dataGridView1.DataSource = bindingSource1;
+
+            color_close_price();
         }
     }
 }
